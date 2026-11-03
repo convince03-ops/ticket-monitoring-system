@@ -7,20 +7,20 @@ datasource db {
 }
 
 model User {
-  id              String          @id @default(cuid())
-  email           String          @unique
-  name            String?
-  role            Role            @default(REQUESTOR)
+  id            String          @id @default(cuid())
+  email         String          @unique
+  name          String?
+  role          Role            @default(REQUESTOR)
   additionalRoles Role[]         @default([])
-  department      Department?     @relation(fields: [departmentId], references: [id])
-  departmentId    String?
-  tickets         Ticket[]        @relation("TicketRequestor")
-  assigned        Ticket[]        @relation("TicketDesigner")
-  activityLogs    ActivityLog[]
-  holidays        Holiday[]
-  notifications   Notification[]
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  department    Department?     @relation(fields: [departmentId], references: [id])
+  departmentId  String?
+  tickets       Ticket[]        @relation("TicketRequestor")
+  assigned      Ticket[]        @relation("TicketDesigner")
+  activityLogs  ActivityLog[]
+  holidays      Holiday[]
+  notifications Notification[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 }
 
 enum Role {
