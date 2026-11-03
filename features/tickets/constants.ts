@@ -1,0 +1,20 @@
+export const ticketColumns = [
+  "Ticket #",
+  "Description",
+  "Department",
+  "Requestor",
+  "Month",
+  "Ticket Request Date",
+  "Level / Type",
+  "Date Received by Artist",
+  "Start Day",
+  "Working Days",
+  "Deadline",
+  "Count",
+  "Status",
+  "Date of Submission",
+  "Designer",
+  "Ticket Level",
+  "Remarks",
+  "Others"
+];
