@@ -1,0 +1,16 @@
+.git
+.vercel
+node_modules
+.next
+.next-build
+out
+build
+dist
+.env*
+.vscode
+*.tsbuildinfo
+app/excel/*.xlsx
+prisma/*.bak
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
