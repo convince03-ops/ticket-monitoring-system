@@ -7,19 +7,20 @@ datasource db {
 }
 
 model User {
-  id            String          @id @default(cuid())
-  email         String          @unique
-  name          String?
-  role          Role            @default(REQUESTOR)
-  department    Department?     @relation(fields: [departmentId], references: [id])
-  departmentId  String?
-  tickets       Ticket[]        @relation("TicketRequestor")
-  assigned      Ticket[]        @relation("TicketDesigner")
-  activityLogs  ActivityLog[]
-  holidays      Holiday[]
-  notifications Notification[]
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id              String         @id @default(cuid())
+  email           String         @unique
+  name            String?
+  role            Role           @default(REQUESTOR)
+  additionalRoles Role[]         @default([])
+  department      Department?    @relation(fields: [departmentId], references: [id])
+  departmentId    String?
+  tickets         Ticket[]       @relation("TicketRequestor")
+  assigned        Ticket[]       @relation("TicketDesigner")
+  activityLogs    ActivityLog[]
+  holidays        Holiday[]
+  notifications   Notification[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 }
 
 enum Role {
@@ -40,13 +41,13 @@ model Department {
 }
 
 model Material {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  slaDays     Int
-  status      Status    @default(ACTIVE)
-  tickets     Ticket[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slaDays   Int
+  status    Status   @default(ACTIVE)
+  tickets   Ticket[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Status {
@@ -124,20 +125,20 @@ model ActivityLog {
 }
 
 model Holiday {
-  id        String   @id @default(cuid())
-  name      String
-  date      DateTime @unique
-  createdBy  User?   @relation(fields: [createdById], references: [id])
+  id          String   @id @default(cuid())
+  name        String
+  date        DateTime @unique
+  createdBy   User?    @relation(fields: [createdById], references: [id])
   createdById String?
-  createdAt DateTime @default(now())
+  createdAt   DateTime @default(now())
 }
 
 model Notification {
-  id         String   @id @default(cuid())
-  user       User     @relation(fields: [userId], references: [id])
-  userId     String
-  title      String
-  message    String
-  read       Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }

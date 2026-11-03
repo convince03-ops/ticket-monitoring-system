@@ -16,7 +16,13 @@ const suggestedQuestions = [
   'How do I request a revision?',
 ];
 
-export function RequestorAssistant({ endpoint = '/api/assistant' }: { endpoint?: string }) {
+export function RequestorAssistant({
+  endpoint = '/api/assistant',
+  scope = 'staff',
+}: {
+  endpoint?: string;
+  scope?: 'staff' | 'requestor';
+}) {
   const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -39,7 +45,7 @@ export function RequestorAssistant({ endpoint = '/api/assistant' }: { endpoint?:
     try {
       const result = await requestorApi<{ answer: string }>(endpoint, {
         method: 'POST',
-        body: JSON.stringify({ question: text, history: priorMessages.slice(-8) }),
+        body: JSON.stringify({ question: text, history: priorMessages.slice(-8), scope }),
       });
       setMessages((items) => [...items, { role: 'assistant', content: result.answer }]);
     } catch (cause) {

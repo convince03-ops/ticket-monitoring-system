@@ -8,7 +8,8 @@ export async function authenticateStaffTicket(request: Request, ticketId: string
   const auth = await authenticatePortalUser(request);
   if (auth.error) return { error: auth.error } as const;
   const identity: PortalIdentity = auth.identity;
-  if (identity.role === 'REQUESTOR') {
+  const canAccessStaffTools = identity.roles.some((role) => role === 'ADMINISTRATOR' || role === 'TECHNICIAN' || role === 'DESIGNER');
+  if (!canAccessStaffTools) {
     return { error: NextResponse.json({ error: 'Staff access required.' }, { status: 403 }) } as const;
   }
 
@@ -17,13 +18,17 @@ export async function authenticateStaffTicket(request: Request, ticketId: string
     return { error: NextResponse.json({ error: 'Ticket not found.' }, { status: 404 }) } as const;
   }
 
-  if (identity.role === 'DESIGNER') {
+  const hasElevatedStaffRole = identity.roles.includes('ADMINISTRATOR') || identity.roles.includes('TECHNICIAN');
+  if (identity.roles.includes('DESIGNER') && !hasElevatedStaffRole) {
     const assignedName = ticket.assignedTo?.trim();
     const assignedTo = assignedName?.toLowerCase();
     const assignedByEmail = assignedTo === identity.email.trim().toLowerCase();
     const matchingDesigners = assignedName && !assignedByEmail
       ? await prisma.user.findMany({
-        where: { role: 'DESIGNER', name: { equals: assignedName, mode: 'insensitive' } },
+        where: {
+          name: { equals: assignedName, mode: 'insensitive' },
+          OR: [{ role: 'DESIGNER' }, { additionalRoles: { has: 'DESIGNER' } }],
+        },
         select: { id: true },
         take: 2,
       })

@@ -134,7 +134,7 @@ export function RequestorShell({ children }: { children: React.ReactNode }) {
           ) : profile ? children : null}
         </main>
       </div>
-      {profile && !loading && !error && <RequestorAssistant />}
+      {profile && !loading && !error && <RequestorAssistant endpoint="/api/requestor/assistant" scope="requestor" />}
     </div>
   );
 }

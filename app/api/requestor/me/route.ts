@@ -9,6 +9,7 @@ export async function GET(request: Request) {
       name: auth.identity.name,
       email: auth.identity.email,
       department: auth.identity.department,
+      roles: auth.identity.roles,
     }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (error) {
     console.error('Failed to load requestor profile:', error);

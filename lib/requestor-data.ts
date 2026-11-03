@@ -91,7 +91,10 @@ export async function getRequestorTickets(identity: PortalIdentity) {
   let nameRows: TicketRow[] = [];
   if (identity.name && identity.name.toLowerCase() !== identity.email.toLowerCase()) {
     const matchingRequestors = await prisma.user.count({
-      where: { name: { equals: identity.name, mode: 'insensitive' }, role: 'REQUESTOR' },
+      where: {
+        name: { equals: identity.name, mode: 'insensitive' },
+        OR: [{ role: 'REQUESTOR' }, { additionalRoles: { has: 'REQUESTOR' } }],
+      },
     });
     if (matchingRequestors === 1) {
       nameRows = await fetchTicketRows({ field: 'requestor', value: identity.name });

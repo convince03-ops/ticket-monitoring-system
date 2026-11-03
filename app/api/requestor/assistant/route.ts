@@ -92,9 +92,13 @@ async function getStaffTickets(identity: PortalIdentity) {
   }
 
   let visibleRows = rows;
-  if (identity.role === 'DESIGNER') {
+  const hasElevatedStaffRole = identity.roles.includes('ADMINISTRATOR') || identity.roles.includes('TECHNICIAN');
+  if (identity.roles.includes('DESIGNER') && !hasElevatedStaffRole) {
     const nameMatches = await prisma.user.findMany({
-      where: { role: 'DESIGNER', name: { equals: identity.name, mode: 'insensitive' } },
+      where: {
+        name: { equals: identity.name, mode: 'insensitive' },
+        OR: [{ role: 'DESIGNER' }, { additionalRoles: { has: 'DESIGNER' } }],
+      },
       select: { id: true },
       take: 2,
     });
@@ -236,7 +240,7 @@ export async function POST(request: Request) {
     const auth = await authenticatePortalUser(request);
     if (auth.error) return auth.error;
 
-    let body: { question?: unknown; history?: unknown };
+    let body: { question?: unknown; history?: unknown; scope?: unknown };
     try {
       body = await request.json() as typeof body;
     } catch {
@@ -245,6 +249,7 @@ export async function POST(request: Request) {
     if (!body || typeof body !== 'object' || Array.isArray(body)) {
       return NextResponse.json({ error: 'Request body must be a JSON object.' }, { status: 400 });
     }
+    const scope = body.scope === 'requestor' ? 'requestor' : 'staff';
     const question = typeof body.question === 'string' ? body.question.trim() : '';
     if (!question || question.length > maxQuestionLength) {
       return NextResponse.json({ error: `Enter a question between 1 and ${maxQuestionLength} characters.` }, { status: 400 });
@@ -258,7 +263,13 @@ export async function POST(request: Request) {
       })
       : [];
 
-    const tickets = auth.identity.role === 'REQUESTOR'
+    if (scope === 'requestor' && !auth.identity.roles.includes('REQUESTOR')) {
+      return NextResponse.json({ error: 'Requestor portal access is not enabled for this account.' }, { status: 403 });
+    }
+    if (scope === 'staff' && !auth.identity.roles.some((role) => role === 'ADMINISTRATOR' || role === 'TECHNICIAN' || role === 'DESIGNER')) {
+      return NextResponse.json({ error: 'Staff access is required.' }, { status: 403 });
+    }
+    const tickets = scope === 'requestor'
       ? await getRequestorTickets(auth.identity)
       : await getStaffTickets(auth.identity);
     const visibleTickets = tickets.slice(0, 20);

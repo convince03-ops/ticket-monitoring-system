@@ -48,7 +48,13 @@ export default function LoginPage() {
         headers: { Authorization: `Bearer ${signInData.session.access_token}` },
         cache: 'no-store',
       });
-      router.replace(profileResponse.ok ? '/requestor/dashboard' : '/');
+      if (profileResponse.ok) {
+        const profile = await profileResponse.json() as { roles?: string[] };
+        const hasStaffRole = profile.roles?.some((role) => ['ADMINISTRATOR', 'TECHNICIAN', 'DESIGNER'].includes(role));
+        router.replace(hasStaffRole ? '/' : '/requestor/dashboard');
+      } else {
+        router.replace('/');
+      }
       router.refresh();
     } catch {
       setError('Unable to sign in right now. Please try again.');

@@ -8,6 +8,7 @@ export interface PortalIdentity {
   name: string;
   department: string | null;
   role: 'ADMINISTRATOR' | 'TECHNICIAN' | 'DESIGNER' | 'REQUESTOR';
+  roles: Array<'ADMINISTRATOR' | 'TECHNICIAN' | 'DESIGNER' | 'REQUESTOR'>;
 }
 
 export type PortalAuthResult =
@@ -44,6 +45,7 @@ export async function authenticatePortalUser(request: Request): Promise<PortalAu
       email: true,
       name: true,
       role: true,
+      additionalRoles: true,
       department: { select: { name: true } },
     },
   });
@@ -58,6 +60,7 @@ export async function authenticatePortalUser(request: Request): Promise<PortalAu
       name: user.name?.trim() || data.user.user_metadata?.full_name || user.email,
       department: user.department?.name ?? null,
       role: user.role,
+      roles: [...new Set([user.role, ...user.additionalRoles])],
     },
   };
 }
@@ -65,7 +68,7 @@ export async function authenticatePortalUser(request: Request): Promise<PortalAu
 export async function authenticateRequestor(request: Request): Promise<PortalAuthResult> {
   const result = await authenticatePortalUser(request);
   if (result.error) return result;
-  if (result.identity.role !== 'REQUESTOR') {
+  if (!result.identity.roles.includes('REQUESTOR')) {
     return { error: NextResponse.json({ error: 'Requestor portal access is not enabled for this account.' }, { status: 403 }) };
   }
   return result;
